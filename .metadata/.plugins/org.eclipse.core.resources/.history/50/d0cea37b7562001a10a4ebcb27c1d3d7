@@ -1,0 +1,197 @@
+package com.everlinkintl.util;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import com.everlinkintl.menu.Button;
+import com.everlinkintl.menu.ClickButton;
+import com.everlinkintl.menu.Menu;
+import com.everlinkintl.menu.ViewButton;
+import com.everlinkintl.po.AccessToken;
+import com.everlinkintl.po.PushTemplate;
+import com.everlinkintl.po.QueueMsssage;
+import com.everlinkintl.po.SysUser;
+import com.everlinkintl.po.TemplateData;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
+
+public class WeixinTokenUtil {
+	private static final String appid = "wxe25642e162c700c4";
+	private static final String appsecret = "39bfca2ffc84a99345e71883dbabf19b";
+	private static final String TEMPLATE_ID = "vhoOo2wiIHgTLHU2SqDUubJy1sVm7RsokkuRW1i3_tg";
+	private static final String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?"
+			+ "grant_type=client_credential&appid=APPID&secret=APPSECRET";
+	private static final String CREATE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
+	private static final String OAUTH2_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?"
+			+ "appid=APPID&secret=APPSECRET&code=CODE&grant_type=authorization_code";
+
+	/**
+	 * get请求
+	 * 
+	 * @param url
+	 * @return
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	public static JSONObject doGetStr(String url) throws ParseException, IOException {
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(url);
+		JSONObject jsonObject = null;
+		HttpResponse httpResponse = client.execute(httpGet);
+		HttpEntity entity = httpResponse.getEntity();
+		if (entity != null) {
+			String result = EntityUtils.toString(entity, "UTF-8");
+			jsonObject = JSONObject.fromObject(result);
+		}
+		return jsonObject;
+	}
+
+	/**
+	 * POST请求
+	 * 
+	 * @param url
+	 * @param outStr
+	 * @return
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	public static JSONObject doPostStr(String url, String outStr) throws ParseException, IOException {
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpPost httpost = new HttpPost(url);
+		JSONObject jsonObject = null;
+		httpost.setEntity(new StringEntity(outStr, "UTF-8"));
+		HttpResponse response = client.execute(httpost);
+		String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+		jsonObject = JSONObject.fromObject(result);
+		return jsonObject;
+	}
+
+	public static JSONObject getOpenId(String code) throws ParseException, IOException {
+		String url = OAUTH2_ACCESS_TOKEN_URL.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE",
+				code);
+		JSONObject jsonObject = doGetStr(url);
+		return jsonObject;
+	}
+
+	/**
+	 * 获取accessToken
+	 * 
+	 * @return
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	public static void getAccessToken() throws ParseException, IOException {
+		String url = ACCESS_TOKEN_URL.replace("APPID", appid).replace("APPSECRET", appsecret);
+		JSONObject jsonObject = doGetStr(url);
+		if (jsonObject != null) {
+			AccessToken.token = jsonObject.optString("access_token");
+			System.out.print(AccessToken.token);
+			AccessToken.expiresIn = jsonObject.optInt("expires_in") - 10;
+			AccessToken.time = new Date().getTime() / 1000;
+		}
+
+	}
+
+	/**
+	 * 组装菜单
+	 * 
+	 * @return
+	 */
+	public static Menu initMenu() {
+		Menu menu = new Menu();
+		ViewButton vButton11 = new ViewButton();
+		vButton11.setName("司机绑定");
+		vButton11.setType("view");
+		vButton11.setUrl("http://dy25zv.natappfree.cc/Weixin/vue/#/OpenIdLoding");
+		vButton11.setName("司机绑定");
+		
+		ViewButton vButton33 = new ViewButton();
+		vButton33.setType("view");
+		vButton33.setUrl("http://dy25zv.natappfree.cc/Weixin/vue/#/Unbind");
+		vButton33.setName("司机解绑");
+		
+		ViewButton vButton21 = new ViewButton();
+		vButton21.setName("费用");
+		vButton21.setType("view");
+		vButton21.setUrl("http://dy25zv.natappfree.cc/evlwx/Vehicle");
+
+		ClickButton button21 = new ClickButton();
+		button21.setName("我是客户");
+		button21.setType("click");
+		button21.setKey("21");
+
+		ClickButton button41 = new ClickButton();
+		button41.setName("我是司机");
+		button41.setSub_button(new Button[] { vButton11, vButton33 ,vButton21 });
+
+		ViewButton button31 = new ViewButton();
+		button31.setName("关于我们");
+		button31.setType("view");
+		button31.setUrl("http://www.everlinkintl.com/");
+
+		menu.setButton(new Button[] { button41, button21, button31 });
+		return menu;
+	}
+
+	public static int createMenu(String token, String menu) throws ParseException, IOException {
+		int result = 0;
+		String url = CREATE_MENU_URL.replace("ACCESS_TOKEN", token);
+		JSONObject jsonObject = doPostStr(url, menu);
+		if (jsonObject != null) {
+
+			result = jsonObject.getInt("errcode");
+		}
+		System.out.print(jsonObject.toString());
+		return result;
+	}
+
+	public static JSONObject pushMessage(String token, QueueMsssage que, SysUser sysUser)
+			throws ParseException, IOException {
+		String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
+		
+		url = url.replace("ACCESS_TOKEN", token);
+		PushTemplate pushTemplate = new PushTemplate();
+		pushTemplate.setTemplate_id(TEMPLATE_ID);
+		pushTemplate.setTopcolor("#CCFFFF");
+		pushTemplate.setTouser(sysUser.getOpenId());
+		Map<String, TemplateData> m = new HashMap<String, TemplateData>();
+		TemplateData first = new TemplateData();
+		first.setValue("您好，您的任务信息如下");
+		first.setColor("#33CCCC");
+		m.put("first", first);
+		TemplateData keyword1 = new TemplateData();
+		keyword1.setValue(que.getSend_to());
+		keyword1.setColor("#000000");
+		m.put("keyword1", keyword1);
+		TemplateData keyword2 = new TemplateData();
+		keyword2.setValue(que.getMsg_body());
+		keyword2.setColor("#000000");
+		m.put("keyword2", keyword2);
+		TemplateData keyword3 = new TemplateData();
+		keyword3.setValue(que.getCreate_date());
+		keyword3.setColor("#000000");
+		m.put("keyword3", keyword3);
+		TemplateData remark = new TemplateData();
+		remark.setColor("#000000");
+		remark.setValue("请及时打开恒联App确认订单！");
+		m.put("remark", remark);
+		pushTemplate.setData(m);
+		JSONObject jsonObject = null;
+//		System.out.print(url+"\n");
+//		System.out.print(JSONObject.fromObject(pushTemplate).toString()+"\n");
+		jsonObject = doPostStr(url, JSONObject.fromObject(pushTemplate).toString());
+
+		return jsonObject;
+	}
+}

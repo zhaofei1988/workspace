@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>Weixin</display-name>
+  <servlet>
+    <servlet-name>weixinServlet</servlet-name>
+    <servlet-class>com.everlinkintl.servlet.WeixinServlet</servlet-class>
+  
+    <load-on-startup>100</load-on-startup>
+   
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>weixinServlet</servlet-name>
+    <url-pattern>/wx.do</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>BindingServlet</servlet-name>
+    <servlet-class>com.everlinkintl.servlet.BindingServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BindingServlet</servlet-name>
+    <url-pattern>/BindingServlet</url-pattern>
+  </servlet-mapping>
+    <servlet>
+    <servlet-name>OpenIdServlet</servlet-name>
+    <servlet-class>com.everlinkintl.servlet.OpenIdServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>OpenIdServlet</servlet-name>
+    <url-pattern>/OpenIdServlet</url-pattern>
+  </servlet-mapping>
+     <servlet>
+    <servlet-name>SendSmsServlet</servlet-name>
+    <servlet-class>com.everlinkintl.servlet.SendSmsServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SendSmsServlet</servlet-name>
+    <url-pattern>/SendSmsServlet</url-pattern>
+  </servlet-mapping>
+      <servlet>
+    <servlet-name>VehicleTasksServlet</servlet-name>
+    <servlet-class>com.everlinkintl.servlet.VehicleTasksServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>VehicleTasksServlet</servlet-name>
+    <url-pattern>/VehicleTasksServlet</url-pattern>
+  </servlet-mapping>
+  
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>
